@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Armchair Insider Lounge — Weekly Reports</title>
 <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@700;900&family=Source+Sans+3:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
@@ -24,13 +24,23 @@
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
+html {
+  height: 100%;
+  -webkit-text-size-adjust: 100%;
+}
+
 body {
   font-family: 'Source Sans 3', sans-serif;
   background: var(--ink);
-  height: 100dvh;
+  min-height: 100vh;
+  min-height: 100svh;
+  height: var(--app-height, 100vh); /* JS-updated fallback for mobile browser toolbars */
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  overscroll-behavior: none;
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
 }
 
 /* ════════════════════════════
@@ -103,8 +113,12 @@ body {
   display: flex;
   gap: 2px;
   overflow-x: auto;
+  overflow-y: hidden;
   scrollbar-width: none;
   flex: 1;
+  -webkit-overflow-scrolling: touch;
+  scroll-snap-type: x proximity;
+  touch-action: pan-x;
 }
 .tabs::-webkit-scrollbar { display: none; }
 
@@ -122,6 +136,9 @@ body {
   transition: all .18s;
   white-space: nowrap;
   border-radius: 4px 4px 0 0;
+  min-height: 48px; /* touch-friendly target */
+  -webkit-tap-highlight-color: transparent;
+  scroll-snap-align: start;
 }
 
 .tab-btn:hover {
@@ -171,30 +188,59 @@ body {
    IFRAME AREA
 ════════════════════════════ */
 .content {
-  flex: 1;
+  flex: 1 1 auto;
+  min-height: 0;
   position: relative;
   background: var(--surface);
   overflow: hidden;
 }
 
 .panel {
-  position: absolute;
-  inset: 0;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity .22s ease;
+  display: none;
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
 }
 
 .panel.active {
-  opacity: 1;
-  pointer-events: all;
+  display: flex;
+  flex-direction: column;
 }
 
 .panel iframe {
   width: 100%;
+  flex: 1 1 auto;
   height: 100%;
+  min-height: 0;
   border: none;
   display: block;
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.report-actions {
+  display: none;
+  flex-shrink: 0;
+  background: var(--gold-pale);
+  border-bottom: 1px solid var(--border);
+  padding: 8px 12px;
+  text-align: center;
+}
+
+.report-actions a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
+  padding: 7px 14px;
+  border-radius: 999px;
+  background: #111008;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+  text-decoration: none;
 }
 
 /* Loading */
@@ -266,15 +312,108 @@ body {
 /* ════════════════════════════
    RESPONSIVE
 ════════════════════════════ */
-@media (max-width: 700px) {
-  .header { padding: 14px 18px 0; }
-  .brand-name { font-size: 17px; }
-  .header-divider { display: none; }
-  .tab-btn { padding: 12px 14px 15px; gap: 8px; }
-  .tab-name { font-size: 14px; }
-  .tab-date { display: none; }
-  .footer { padding: 8px 18px; }
-  .footer-right { display: none; }
+@media (max-width: 900px) {
+  body {
+    height: var(--app-height, 100svh);
+  }
+
+  .header {
+    padding: calc(12px + env(safe-area-inset-top)) 14px 0;
+  }
+
+  .header-top {
+    align-items: stretch;
+    gap: 10px;
+    margin-bottom: 0;
+    flex-wrap: wrap;
+  }
+
+  .logo-img {
+    width: 40px;
+    height: 40px;
+  }
+
+  .header-brand {
+    justify-content: center;
+    min-width: 0;
+  }
+
+  .brand-name {
+    font-size: 17px;
+  }
+
+  .brand-sub {
+    font-size: 9.5px;
+    letter-spacing: .1em;
+  }
+
+  .header-divider {
+    display: none;
+  }
+
+  .tabs {
+    order: 3;
+    flex: 0 0 100%;
+    margin: 10px -14px 0;
+    padding: 0 12px;
+  }
+
+  .tab-btn {
+    padding: 10px 13px 12px;
+    gap: 7px;
+    min-height: 48px;
+  }
+
+  .tab-icon {
+    font-size: 19px;
+  }
+
+  .tab-name {
+    font-size: 14px;
+  }
+
+  .tab-date {
+    display: none;
+  }
+
+  .report-actions {
+    display: block; /* mobile fallback when nested iframe scrolling is restricted */
+  }
+
+  .footer {
+    padding: 8px 14px calc(8px + env(safe-area-inset-bottom));
+  }
+
+  .footer-notice {
+    font-size: 12px;
+    line-height: 1.25;
+  }
+
+  .footer-right {
+    display: none;
+  }
+}
+
+@media (max-width: 420px) {
+  .header-top {
+    gap: 8px;
+  }
+
+  .brand-name {
+    font-size: 16px;
+  }
+
+  .tab-btn {
+    padding-inline: 11px;
+  }
+
+  .tab-name {
+    font-size: 13px;
+  }
+
+  .tab-icon {
+    font-size: 18px;
+  }
 }
 </style>
 </head>
@@ -372,14 +511,26 @@ body {
 </footer>
 
 <script>
+// Mobile-safe viewport height. This avoids iOS Safari/Chrome toolbar issues caused by 100vh/100dvh.
+function setAppHeight() {
+  document.documentElement.style.setProperty('--app-height', `${window.innerHeight}px`);
+}
+setAppHeight();
+window.addEventListener('resize', setAppHeight, { passive: true });
+window.addEventListener('orientationchange', () => setTimeout(setAppHeight, 250), { passive: true });
+
 function show(btn) {
   document.querySelectorAll('.tab-btn').forEach(b => {
     b.classList.remove('active');
     b.setAttribute('aria-selected', 'false');
   });
+
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+
   btn.classList.add('active');
   btn.setAttribute('aria-selected', 'true');
+  btn.scrollIntoView({ behavior: 'smooth', inline: 'nearest', block: 'nearest' });
+
   const target = document.getElementById(btn.dataset.panel);
   if (target) target.classList.add('active');
 }
@@ -388,6 +539,24 @@ function loaded(id) {
   const el = document.getElementById(id);
   if (el) { el.classList.add('done'); setTimeout(() => el.remove(), 400); }
 }
+
+// Add direct report links as a mobile fallback when a browser limits nested iframe scrolling.
+document.querySelectorAll('.panel').forEach(panel => {
+  const iframe = panel.querySelector('iframe');
+  if (!iframe || panel.querySelector('.report-actions')) return;
+
+  const bar = document.createElement('div');
+  bar.className = 'report-actions';
+
+  const link = document.createElement('a');
+  link.href = iframe.getAttribute('src');
+  link.target = '_blank';
+  link.rel = 'noopener';
+  link.textContent = 'Open this report directly';
+
+  bar.appendChild(link);
+  panel.insertBefore(bar, iframe);
+});
 
 document.addEventListener('keydown', e => {
   const btns = [...document.querySelectorAll('.tab-btn')];
