@@ -871,7 +871,7 @@ function getFilteredData() {
   let rows = [...DATA];
   const q = document.getElementById('searchBox').value.toLowerCase().trim();
   if (q) rows = rows.filter(d => d.ticker.toLowerCase().includes(q) || d.name.toLowerCase().includes(q) || d.type.toLowerCase().includes(q) || d.freq.toLowerCase().includes(q));
-  if (currentFilter === 'BDC') rows = rows.filter(d => broadType(d.type) === 'BDCs / BDC ETFs');
+  if (currentFilter === 'BDC') rows = rows.filter(d => d.type.toLowerCase().includes('bdc'));
   else if (currentFilter === 'CEF') rows = rows.filter(d => broadType(d.type) === 'CEFs');
   else if (currentFilter === 'ETF') rows = rows.filter(d => broadType(d.type) === 'ETFs');
   else if (currentFilter === 'hiyield') rows = rows.filter(d => d.yield >= 20);
